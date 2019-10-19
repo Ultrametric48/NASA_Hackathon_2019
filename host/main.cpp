@@ -69,26 +69,21 @@ public:
     }
     
     
-    float leapfrog_q(float (*func)(float t, float r, float v), float t, float r, float v, float h){
-        
-        float r1, v1, h_new;
-        h_new = h/2.0;
-       
-        r1 = r + h_new*func(t, r, v);
-        v1 = v + h*func(t+h_new, r1, v);
-        r1 = r1 + h_new*func(t+h, r, v1);
-        
-        return r1;
-    }
-    
     float leapfrog_qx(float (*func)(float t, float x, float vx), float t, float x, float vx, float h){
         
-        float x1, vx1, h_new;
+        float x1,x2, vx1, h_new;
         h_new = h/2.0;
        
         x1 = x + h_new*func(t, x, vx);
         vx1 = vx + h*func(t+h_new, x1, vx);
-        x1 = x1 + h_new*func(t+h, x, vx1);
+        x2 = x1 + h_new*func(t, x, vx1);
+    
+        
+        
+        
+        
+        
+        
         
         return x1;
     }
@@ -196,9 +191,22 @@ float Rayeqn_three(float t,  float x, float y, float z){return 0;}
 
 int m=1.0;
 
-float Paricleeqn_x(float t,  float r, float vx){return m*vx*vx/2.0;}
-float Paricleeqn_y(float t,  float r, float vy){return m*vy*vy/2.0;}
-float Paricleeqn_z(float t,  float r, float vz){return m*vz*vz/2.0;}
+float Paricleeqn_x(float t,  float r, float vx){return vx;}
+float Paricleeqn_y(float t,  float r, float vy){return vy;}
+float Paricleeqn_z(float t,  float r, float vz){return vz;}
+
+float Paricleeqn_px(float t,  float r, float vx){return m*vx*vx/2.0;}
+float Paricleeqn_py(float t,  float r, float vy){return m*vy*vy/2.0;}
+float Paricleeqn_pz(float t,  float r, float vz){return m*vz*vz/2.0;}
+
+
+float oscilator_x(float t,  float x, float vx){return vx;}
+float oscilator_y(float t,  float y, float vy){return vy;}
+float oscilator_z(float t,  float z, float vz){return vz;}
+
+float oscilator_px(float t,  float x, float vx){return -x;}
+float oscilator_py(float t,  float y, float vy){return -y;}
+float oscilator_pz(float t,  float z, float vz){return -z;}
         
 
 //#pragma OPENCL EXTENSION cl_intel_printf : enable
@@ -268,8 +276,8 @@ int main( int argc, char* argv[] )
     float vy_temp = 1.0;
     float vz_temp = 1.0;
     float t = 0.0;
-    float h = 0.00001;
-    int iteration_number = 100000;
+    float h = 0.0001;
+    int iteration_number = 1000000;
     float x_solutions[iteration_number];
     float y_solutions[iteration_number];
     float z_solutions[iteration_number];
@@ -286,14 +294,14 @@ int main( int argc, char* argv[] )
     #pragma unroll
     for(int k = 0; k < iteration_number; k++){
         //position update
-        x_temp = exp.leapfrog_qx(Paricleeqn_x, t, x, vx, h);
-        y_temp = exp.leapfrog_qy(Paricleeqn_y, t, y, vy, h);
-        z_temp = exp.leapfrog_qz(Paricleeqn_z, t, z, vz, h);
+        x_temp = exp.leapfrog_qx(oscilator_x, t, x, vx, h);
+        y_temp = exp.leapfrog_qy(oscilator_y, t, y, vy, h);
+        z_temp = exp.leapfrog_qz(oscilator_z, t, z, vz, h);
         
         //momentum update
-        vx_temp = exp.leapfrog_px(Paricleeqn_x, t, x, vx, h);
-        vy_temp = exp.leapfrog_py(Paricleeqn_y, t, y, vy, h);
-        vz_temp = exp.leapfrog_pz(Paricleeqn_z, t, z, vz, h);
+        vx_temp = exp.leapfrog_px(oscilator_px, t, x, vx, h);
+        vy_temp = exp.leapfrog_py(oscilator_py, t, y, vy, h);
+        vz_temp = exp.leapfrog_pz(oscilator_pz, t, z, vz, h);
         
         
         t += h;
@@ -313,7 +321,7 @@ int main( int argc, char* argv[] )
         py_solutions[iteration_number] = vy;
         pz_solutions[iteration_number] = vz;
         
-        printf("%f,%f,%f,%f,%d\n", x, y, z, vx, vy, vz, t, k);
+        printf("%f,%f,%f,%f,%f,%f,%f,%d\n", x, y, z, vx, vy, vz, t, k);
     }
     
     
