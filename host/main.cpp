@@ -195,9 +195,9 @@ float Paricleeqn_x(float t,  float r, float vx){return vx;}
 float Paricleeqn_y(float t,  float r, float vy){return vy;}
 float Paricleeqn_z(float t,  float r, float vz){return vz;}
 
-float Paricleeqn_px(float t,  float r, float vx){return m*vx*vx/2.0;}
-float Paricleeqn_py(float t,  float r, float vy){return m*vy*vy/2.0;}
-float Paricleeqn_pz(float t,  float r, float vz){return m*vz*vz/2.0;}
+float Paricleeqn_px(float t,  float x, float vx){return 0;}
+float Paricleeqn_py(float t,  float y, float vy){return 0;}
+float Paricleeqn_pz(float t,  float z, float vz){return 0;}
 
 
 float oscilator_x(float t,  float x, float vx){return vx;}
@@ -294,14 +294,14 @@ int main( int argc, char* argv[] )
     #pragma unroll
     for(int k = 0; k < iteration_number; k++){
         //position update
-        x_temp = exp.leapfrog_qx(oscilator_x, t, x, vx, h);
-        y_temp = exp.leapfrog_qy(oscilator_y, t, y, vy, h);
-        z_temp = exp.leapfrog_qz(oscilator_z, t, z, vz, h);
+        x_temp = exp.leapfrog_qx(Paricleeqn_x, t, x, vx, h);
+        y_temp = exp.leapfrog_qy(Paricleeqn_y, t, y, vy, h);
+        z_temp = exp.leapfrog_qz(Paricleeqn_z, t, z, vz, h);
         
         //momentum update
-        vx_temp = exp.leapfrog_px(oscilator_px, t, x, vx, h);
-        vy_temp = exp.leapfrog_py(oscilator_py, t, y, vy, h);
-        vz_temp = exp.leapfrog_pz(oscilator_pz, t, z, vz, h);
+        vx_temp = exp.leapfrog_px(Paricleeqn_px, t, x, vx, h);
+        vy_temp = exp.leapfrog_py(Paricleeqn_py, t, y, vy, h);
+        vz_temp = exp.leapfrog_pz(Paricleeqn_pz, t, z, vz, h);
         
         
         t += h;
