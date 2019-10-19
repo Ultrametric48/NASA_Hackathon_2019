@@ -68,6 +68,31 @@ public:
         return z + (k1 + k4)/6.0 + (k2 + k3)/3.0;
     }
     
+    
+    float leapfrog_q(float (*func)(float t, float r, float v), float t, float r, float v, float h){
+        
+        float r1, v1, h_new;
+        h_new = h/2.0;
+       
+        r1 = r + h_new*func(t, r, v);
+        v1 = v + h*func(t+h_new, r1, v);
+        r1 = r1 + h_new*func(t+h, r, v1);
+        
+        return r1;
+    }
+    
+    float leapfrog_p(float (*func)(float t, float r, float v), float t, float r, float v, float h){
+        
+        float r1, v1, h_new;
+        h_new = h/2.0;
+       
+        r1 = r + h_new*func(t, r, v);
+        v1 = v + h*func(t+h_new, r1, v);
+        r1 = r1 + h_new*func(t+h, r, v1);
+         
+        return v1;
+    }
+    
 };
 
 
@@ -103,6 +128,12 @@ static float d = 1.0;
 float Rayeqn_one(float t,  float x, float y, float z){return y;}
 float Rayeqn_two(float t,  float x, float y, float z){return -1.0/(cee*d) * (x + beta*y*y*y - alpha*y);}
 float Rayeqn_three(float t,  float x, float y, float z){return 0;}
+
+int m=1.0;
+
+float Paricleeqn_x(float t,  float px){return px*px/2.0*m;}
+float Paricleeqn_y(float t,  float x, float y, float z){return -1.0/(cee*d) * (x + beta*y*y*y - alpha*y);}
+float Paricleeqn_z(float t,  float x, float y, float z){return 0;}
         
 
 //#pragma OPENCL EXTENSION cl_intel_printf : enable
@@ -129,7 +160,7 @@ const char *kernelSource =                                       "\n" \
 int main( int argc, char* argv[] )
 {
     // Length of vectors
-    unsigned int n = 100000;
+    unsigned int n = 20000;
  
     // Host input vectors
     double *h_a;
@@ -182,6 +213,7 @@ int main( int argc, char* argv[] )
         x_temp = exp.Runge_Kutta_4x(Leqn_one, t, x, y, z, h);
         y_temp = exp.Runge_Kutta_4y(Leqn_two, t, x, y, z, h);
         z_temp = exp.Runge_Kutta_4z(Leqn_three, t, x, y, z, h);
+        
         t += h;
         x = x_temp;
         y = y_temp;
@@ -194,6 +226,8 @@ int main( int argc, char* argv[] )
     
     
     exit(0);
+    
+    
  
     // Allocate memory for each vector on host
     h_a = (double*)malloc(bytes);
