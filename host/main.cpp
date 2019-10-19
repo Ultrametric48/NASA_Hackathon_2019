@@ -81,16 +81,81 @@ public:
         return r1;
     }
     
-    float leapfrog_p(float (*func)(float t, float r, float v), float t, float r, float v, float h){
+    float leapfrog_qx(float (*func)(float t, float x, float vx), float t, float x, float vx, float h){
         
-        float r1, v1, h_new;
+        float x1, vx1, h_new;
         h_new = h/2.0;
        
-        r1 = r + h_new*func(t, r, v);
-        v1 = v + h*func(t+h_new, r1, v);
-        r1 = r1 + h_new*func(t+h, r, v1);
-         
-        return v1;
+        x1 = x + h_new*func(t, x, vx);
+        vx1 = vx + h*func(t+h_new, x1, vx);
+        x1 = x1 + h_new*func(t+h, x, vx1);
+        
+        return x1;
+    }
+    
+    float leapfrog_qy(float (*func)(float t, float y, float vy), float t, float y, float vy, float h){
+        
+        float y1, vy1, h_new;
+        h_new = h/2.0;
+       
+        y1 = y + h_new*func(t, y, vy);
+        vy1 = vy + h*func(t+h_new, y1, vy);
+        y1 = y1 + h_new*func(t+h, y, vy1);
+        
+        return y1;
+    }
+    
+    float leapfrog_qz(float (*func)(float t, float z, float vz), float t, float z, float vz, float h){
+        
+        float z1, vz1, h_new;
+        h_new = h/2.0;
+       
+        z1 = z + h_new*func(t, z, vz);
+        vz1 = vz + h*func(t+h_new, z1, vz);
+        z1 = z1 + h_new*func(t+h, z, vz1);
+        
+        return z1;
+    }
+    
+    
+    
+    
+    float leapfrog_px(float (*func)(float t, float x, float vx), float t, float x, float vx, float h){
+        
+        float x1, vx1, h_new;
+        h_new = h/2.0;
+       
+        x1 = x + h_new*func(t, x, vx);
+        vx1 = vx + h*func(t+h_new, x1, vx);
+        x1 = x1 + h_new*func(t+h, x, vx1);
+        
+        return vx1;
+    }
+    
+    
+    float leapfrog_py(float (*func)(float t, float y, float vy), float t, float y, float vy, float h){
+        
+        float y1, vy1, h_new;
+        h_new = h/2.0;
+       
+        y1 = y + h_new*func(t, y, vy);
+        vy1 = vy + h*func(t+h_new, y1, vy);
+        y1 = y1 + h_new*func(t+h, y, vy1);
+        
+        return vy1;
+    }
+    
+    
+    float leapfrog_pz(float (*func)(float t, float z, float vz), float t, float z, float vz, float h){
+        
+        float z1, vz1, h_new;
+        h_new = h/2.0;
+       
+        z1 = z + h_new*func(t, z, vz);
+        vz1 = vz + h*func(t+h_new, z1, vz);
+        z1 = z1 + h_new*func(t+h, z, vz1);
+        
+        return vz1;
     }
     
 };
@@ -131,9 +196,9 @@ float Rayeqn_three(float t,  float x, float y, float z){return 0;}
 
 int m=1.0;
 
-float Paricleeqn_x(float t,  float px){return px*px/2.0*m;}
-float Paricleeqn_y(float t,  float x, float y, float z){return -1.0/(cee*d) * (x + beta*y*y*y - alpha*y);}
-float Paricleeqn_z(float t,  float x, float y, float z){return 0;}
+float Paricleeqn_x(float t,  float r, float vx){return m*vx*vx/2.0;}
+float Paricleeqn_y(float t,  float r, float vy){return m*vy*vy/2.0;}
+float Paricleeqn_z(float t,  float r, float vz){return m*vz*vz/2.0;}
         
 
 //#pragma OPENCL EXTENSION cl_intel_printf : enable
@@ -193,9 +258,15 @@ int main( int argc, char* argv[] )
     float x = 1.000001;
     float y = 1.0;
     float z = 1.0;
+    float vx = 1.0;
+    float vy = 1.0;
+    float vz = 1.0;
     float x_temp = 1.0;
     float y_temp = 1.0;
     float z_temp = 1.0;
+    float vx_temp = 1.0;
+    float vy_temp = 1.0;
+    float vz_temp = 1.0;
     float t = 0.0;
     float h = 0.001;
     int iteration_number = 100000;
@@ -203,25 +274,46 @@ int main( int argc, char* argv[] )
     float y_solutions[iteration_number];
     float z_solutions[iteration_number];
     
+    float px_solutions[iteration_number];
+    float py_solutions[iteration_number];
+    float pz_solutions[iteration_number];
     
     
     
     
-    puts("x,y,z,time,iteration");
+    
+    puts("x,y,z,px,py,pz,time,iteration");
     #pragma unroll
     for(int k = 0; k < iteration_number; k++){
-        x_temp = exp.Runge_Kutta_4x(Leqn_one, t, x, y, z, h);
-        y_temp = exp.Runge_Kutta_4y(Leqn_two, t, x, y, z, h);
-        z_temp = exp.Runge_Kutta_4z(Leqn_three, t, x, y, z, h);
+        //position update
+        x_temp = exp.leapfrog_qx(Paricleeqn_x, t, x, vx, h);
+        y_temp = exp.leapfrog_qy(Paricleeqn_y, t, y, vy, h);
+        z_temp = exp.leapfrog_qz(Paricleeqn_z, t, z, vz, h);
+        
+        //momentum update
+        vx_temp = exp.leapfrog_px(Paricleeqn_x, t, x, vx, h);
+        vy_temp = exp.leapfrog_py(Paricleeqn_y, t, y, vy, h);
+        vz_temp = exp.leapfrog_pz(Paricleeqn_z, t, z, vz, h);
+        
         
         t += h;
         x = x_temp;
         y = y_temp;
         z = z_temp;
+        
+        vx = vx_temp;
+        vy = vy_temp;
+        vz = vz_temp;
+        
         x_solutions[iteration_number] = x;
         y_solutions[iteration_number] = y;
         z_solutions[iteration_number] = z;
-        printf("%f,%f,%f,%f,%d\n", x, y, z, t, k);
+        
+        px_solutions[iteration_number] = vx;
+        py_solutions[iteration_number] = vy;
+        pz_solutions[iteration_number] = vz;
+        
+        printf("%f,%f,%f,%f,%d\n", x, y, z, vx, vy, vz, t, k);
     }
     
     
