@@ -12,6 +12,9 @@ t_data = df['time']
 x_data = df['x']
 y_data = df['y']
 z_data = df['z']
+px_data = df['px']
+py_data = df['py']
+pz_data = df['pz']
 
 
 fig = plt.figure()
@@ -19,10 +22,9 @@ fig = plt.figure()
 
 ax = fig.add_subplot(111, projection='3d')
 ax.plot(x_data,y_data,z_data)
-plt.plot(t_data, x_data)
-plt.savefig('./webpage/attractor_3d_plot.pdf')
+#plt.plot(t_data, x_data)
 
-
+plt.show()
 
 
 
