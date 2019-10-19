@@ -268,7 +268,7 @@ int main( int argc, char* argv[] )
     float vy_temp = 1.0;
     float vz_temp = 1.0;
     float t = 0.0;
-    float h = 0.001;
+    float h = 0.00001;
     int iteration_number = 100000;
     float x_solutions[iteration_number];
     float y_solutions[iteration_number];
