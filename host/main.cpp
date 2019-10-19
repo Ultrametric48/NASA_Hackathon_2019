@@ -195,7 +195,7 @@ float Paricleeqn_x(float t,  float r, float vx){return vx;}
 float Paricleeqn_y(float t,  float r, float vy){return vy;}
 float Paricleeqn_z(float t,  float r, float vz){return vz;}
 
-float Paricleeqn_px(float t,  float x, float vx){return 0;}
+float Paricleeqn_px(float t,  float x, float vx){return -5.0;}
 float Paricleeqn_py(float t,  float y, float vy){return 0;}
 float Paricleeqn_pz(float t,  float z, float vz){return 0;}
 
@@ -263,11 +263,11 @@ int main( int argc, char* argv[] )
     //Function
     
     first_order_diff_eq_solver exp; //constructor initial conditions
-    float x = 1.000001;
-    float y = 1.0;
-    float z = 1.0;
-    float vx = 1.0;
-    float vy = 1.0;
+    float x = 0.0;
+    float y = 0.0;
+    float z = 0.0;
+    float vx = 0.0;
+    float vy = 0.0;
     float vz = 1.0;
     float x_temp = 1.0;
     float y_temp = 1.0;
